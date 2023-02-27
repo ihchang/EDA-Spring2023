@@ -73,13 +73,17 @@ NTL.phys.data.JunethruOctober <- filter(NTL.phys.data, daynum %in% c(152:304))
 ```{r Exercise 1 & 2}
 # Exercise 1: 
 # filter NTL.phys.data for the year 1999
+#we have year that will tell you what year it will be recorded, so you can choose how to filter, she will tell us how many rows the filtered data should have
 # what code do you need to use, based on the class of the variable?
-
+NTL.phys.data1999 <- filter(NTL.phys.data, year4 == 1999)
+#1898 rows
 
 # Exercise 2: 
 # filter NTL.phys.data for Tuesday Lake from 1990 through 1999.
-
-
+#you also want to filter 1990 through 1999 and these belong to different columns in your dataset
+NTL.phys.data1990 <- filter(NTL.phys.data, lakename=="Tuesday Lake" & year4 >= 1990 &
+                              year4 <=1999)
+#1971 rows
 ```
 Question: Why don't we filter using row numbers?
 
@@ -95,6 +99,9 @@ Let's say we want to take our raw dataset (NTL.phys.data), *then* filter the dat
 
 ```{r Exercise 3 & 4}
 #Example using pipes to wrangle data
+#if we are doing things within a pipe, then you dont need to use the first R command because function filter knows to use that data set. you also dont need to assign it for each step of the way.
+#use a pipe to do the same thing as above, but you want July only
+
 NTL.phys.data.processed <- 
   NTL.phys.data %>%
   filter(lakename == "Paul Lake" | lakename == "Peter Lake") %>%
@@ -103,12 +110,30 @@ NTL.phys.data.processed <-
 
 #Exercise 3: Using a pipe filter NTL.phys.data for Tuesday Lake from 1990 
 # through 1999 only for July.
+#since you are in the pipe you dont need the name of the file again
+#you can also mutate it
+#command shift M is a shortcut for the pipe symbol
+#the summary function just gives you summary stats, but summarize will perform a specific one
 
+NTL.phys.data.Ex3 <-
+  NTL.phys.data %>%
+  filter(lakename == "Tuesday Lake" & year4 >= 1990 &
+           year4 <= 1999 & month (sampledate) == 7)
+
+#537 observations
+  
 
 #Exercise 4: Using the data from part 3, a pipe, and the summarize() function 
 # find the mean surface temperature (hints: you will need to add another
 # filter for depth==0). Make sure you eliminate NAs before computing the means.
 
+NTL.phys.data.Ex4 <-
+  NTL.phys.data.Ex3 %>% 
+  filter(depth ==0) %>% 
+  drop_na(temperature_C) %>% 
+  summarize(mean_temp <- mean(temperature_C))
+
+#how do you see what the mean is?
   
 ```
 
@@ -121,9 +146,20 @@ For gather we will use `pivot_longer` and for spread we will use `pivot_wider`.
 #  on the deck of the sampling boat) into one column using pivot_longer. Name
 #  the new column holding the irradiance type as "Irradiance_Type", and name the
 #  new column holding the irradiance values as "Irradiance_Value".
-
-
+#you need to provide the column names that you want to transform into one
+NTL.phys.data.Ex5 <-
+  NTL.phys.data %>% 
+  pivot_longer(irradianceWater:irradianceDeck,
+               names_to = "irradiance",
+               values_to = "radiation") #you can name it whatever, but you need to pick a new name
 #Exercise 6: Spread temperatureC into more than one column based on the depth.
+#you want to make it wider, so when you create a wider data frame, each element in the depth will become a column name and you are taking the values from temperature
+#31k observations
+#you are generating a lot of NAs
 
+NTL.phys.data.Ex6 <-
+  NTL.phys.data %>% 
+  pivot_wider(names_from = "depth",
+              values_from = "temperature_C")
 ```
 

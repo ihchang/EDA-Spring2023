@@ -40,18 +40,18 @@ vector2
 vector3 <- c(TRUE,TRUE,TRUE,FALSE,TRUE,FALSE) #logical vector
 vector3
 
-vector1[3] # 
+vector1[3] # everything in a vector needs the same data type, one dimension just keep adding rows of values. this should return 5.3
 
 # Matrices ----
-matrix1 <- matrix(1:20, nrow = 5,ncol = 4) # 
+matrix1 <- matrix(1:20, nrow = 5,ncol = 4) # specify its dimensions in terms of rows and columns
 matrix1
-matrix2 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE) #
+matrix2 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE) #enter these by row because the default is columns
 matrix2
 matrix3 <- matrix(1:20, nrow = 5, ncol = 4, byrow = TRUE, # return after comma continues the line
                   dimnames = list(c("uno", "dos", "tres", "quatro", "cinco"), 
                                   c("un", "deux", "trois", "quatre"))) #
 
-matrix1[4, ] #
+matrix1[4, ] #this gives you the 4th row, but you don't specify columns so it will give you all of them
 matrix1[ , 3] #
 matrix1[c(12, 14)] #
 matrix1[c(12:14)] #
@@ -63,15 +63,17 @@ cnames <- c("C1", "C2")
 matrix4 <- matrix(cells, nrow = 2, ncol = 2, byrow = TRUE,
   dimnames = list(rnames, cnames)) # 
 matrix4
+#a matrix is just an array or something like that. an array is the same location over time, so you have a stack by 2x2, and then there can be multidimen arrays. all the values in these things must be the same data type and allow you to do really fast calculations.
 
-# Lists ---- 
-list1 <- list(name = "Maria", mynumbers = vector1, mymatrix = matrix1, age = 5.3); list1
-list1[[2]]
+# Lists ---- #you can throw anything in a list, so this list will have 4 items in it
+list1 <- list(name = "Maria", mynumbers = vector1, mymatrix = matrix1, age = 5.3); list1 #each of the items we give a name so we can retrieve it. the ; allows us to put 2 codes on one line
+list1[[2]] #you can refer to items within the index, but it needs double brackets
+#to rename: list1['name'] <- "mario"
 
 # Data Frames ----
-d <- c(1, 2, 3, 4) # What type of vector?
-e <- c("red", "white", "red", NA) # What type of vector?
-f <- c(TRUE, TRUE, TRUE, FALSE) # What type of vector?
+d <- c(1, 2, 3, 4) # What type of vector? numeric
+e <- c("red", "white", "red", NA) # What type of vector? character
+f <- c(TRUE, TRUE, TRUE, FALSE) # What type of vector? logical
 dataframe1 <- data.frame(d,e,f) #
 names(dataframe1) <- c("ID","Color","Passed"); View(dataframe1) # 
 
@@ -79,6 +81,9 @@ dataframe1[1:2,] #
 dataframe1[c("ID","Passed")] # 
 dataframe1$ID
 
+#a data frame is like a list of vectors
+temp_high_f <- c(64,71,72,63,51,52,61,64,67,73)
+temp_low_f <- c(42, 49, 60,46,32,32,41,47,52,54)
 ```
 
 Question: How do the different types of data appear in the Environment tab?
@@ -94,13 +99,19 @@ Question: In the R chunk below, write "dataframe1\$". Press `tab` after you type
 Find a ten-day forecast of temperatures (Fahrenheit) for Durham, North Carolina. Create two vectors, one representing the high temperature on each of the ten days and one representing the low.
 
 ```{r DataExercise-1a}
-
+temp_high_f <- c(64,71,72,63,51,52,61,64,67,73)
+temp_low_f <- c(42, 49, 60,46,32,32,41,47,52,54)
 ```
 
 Now, create two additional vectors that include the ten-day forecast for the high and low temperatures in Celsius. Use a function to create the two new vectors from your existing ones in Fahrenheit.
 
 ```{r DataExercise-1b}
-
+f_to_c <- function(F){
+  C <- round(((F-32)*5/9),2)
+  return(C)
+}
+temp_high_c <- f_to_c(temp_high_f)
+temp_low_c <- f_to_c(temp_low_f)
 ```
 
 Combine your four vectors into a data frame and add informative column names.
@@ -112,7 +123,9 @@ Combine your four vectors into a data frame and add informative column names.
 Use the common functions `summary` and `sd` to obtain basic data summaries of the ten-day forecast. How would you call these functions differently for the entire data frame vs. a single column? Attempt to demonstrate both options below.
 
 ```{r DataExercise-1d}
+summary(df_Temps)
 
+#how do we get a vector from our data frame? use the $ so that you can find the sd
 ```
 
 ### Date objects
@@ -126,7 +139,7 @@ Remember formatting of dates in R:
 # Write code for three different date formats. 
 # An example is provided to get you started.
 # (code must be uncommented)
-today <- Sys.Date()
+today <- Sys.Date() #utc: universal time coordinate
 format(today, format = "%B")
 #format(today, format = "")
 #format(today, format = "")
@@ -141,7 +154,7 @@ Install and load the package lubridate into your R session. Lubridate offers fas
 More info on lubridate [here][<https://cran.r-project.org/web/packages/lubridate/lubridate.pdf>].
 
 ```{r DateExercise1}
-#install.packages("lubridate")
+install.packages("lubridate")
 library(lubridate)
 
 #Ex1
@@ -159,8 +172,8 @@ date_obj_today
 #Ex_3 - on your own...
 str_juneteenth <- "19 June 1865"
 #Since the format is month-day-year we will use function mdy()
-#date_juneteenth <- ()
-#date_juneteenth
+date_juneteenth <- ()
+date_juneteenth
 ```
 
 ```{r DateExercise2}

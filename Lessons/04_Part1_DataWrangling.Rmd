@@ -29,10 +29,10 @@ library(tidyverse)
 library(lubridate)
 NTL.phys.data <- read.csv("./Data/Raw/NTL-LTER_Lake_ChemistryPhysics_Raw.csv", stringsAsFactors = TRUE)
 
-colnames(NTL.phys.data)
-head(NTL.phys.data)
-summary(NTL.phys.data)
-str(NTL.phys.data)
+colnames(NTL.phys.data) #gives you all the names of the columns, although its repeated by date, the same date appears more than once because there is data is recorded at different depths
+head(NTL.phys.data) #first few data points
+summary(NTL.phys.data) #summary for each of the columns
+str(NTL.phys.data) #what is the data type for each column, because date is as a factor, you need to make it into a date
 dim(NTL.phys.data)
 
 class(NTL.phys.data$sampledate)
@@ -64,23 +64,23 @@ Filtering allows us to choose certain rows (observations) in our dataset.
 
 Here are the relevant commands used in the `filter` function. Add some notes to designate what these commands mean. 
 `==`
-`!=`
+`!=` #not
 `<`
 `<=`
 `>`
 `>=`
-`&`
-`|`
+`&` #multiple conditions to check, need to aggregate is using this
+`|` #if one or the other should be true, this is the or function
 
 ```{r}
 class(NTL.phys.data$lakeid)
-class(NTL.phys.data$depth)
+class(NTL.phys.data$depth) #dataframes work as matrix
 
 # matrix filtering
-NTL.phys.data.surface1 <- NTL.phys.data[NTL.phys.data$depth == 0,]
+NTL.phys.data.surface1 <- NTL.phys.data[NTL.phys.data$depth == 0,] #filtering so for all the rows that have a 0 on the column depth
 
 # dplyr filtering
-NTL.phys.data.surface2 <- filter(NTL.phys.data, depth == 0)
+NTL.phys.data.surface2 <- filter(NTL.phys.data, depth == 0) #its asking for the data set, the second argument is whatever you are trying to filter
 NTL.phys.data.surface3 <- filter(NTL.phys.data, depth < 0.25)
 
 # Did the methods arrive at the same result?
@@ -93,12 +93,12 @@ dim(NTL.phys.data.surface3)
 
 # Choose multiple conditions to filter
 summary(NTL.phys.data$lakename)
-NTL.phys.data.PeterPaul1 <- filter(NTL.phys.data, lakename == "Paul Lake" | lakename == "Peter Lake")
+NTL.phys.data.PeterPaul1 <- filter(NTL.phys.data, lakename == "Paul Lake" | lakename == "Peter Lake") #extract just paul lake and peter lake
 NTL.phys.data.PeterPaul2 <- filter(NTL.phys.data, lakename != "Central Long Lake" & 
                                      lakename != "Crampton Lake" & lakename != "East Long Lake" &
                                      lakename != "Hummingbird Lake" & lakename != "Tuesday Lake" &
-                                     lakename != "Ward Lake" & lakename != "West Long Lake")
-NTL.phys.data.PeterPaul3 <- filter(NTL.phys.data, lakename %in% c("Paul Lake", "Peter Lake"))
+                                     lakename != "Ward Lake" & lakename != "West Long Lake") #this is similar because we are now excluding all the other lakes, filter only affects rows
+NTL.phys.data.PeterPaul3 <- filter(NTL.phys.data, lakename %in% c("Paul Lake", "Peter Lake")) #%in%, this is useful when you need to select more than two options, all you need to do is choose the vectors
 
 # Choose a range of conditions of a numeric or integer variable
 summary(NTL.phys.data$daynum)
@@ -126,7 +126,7 @@ Question: Why don't we filter using row numbers?
 Arranging allows us to change the order of rows in our dataset. By default, the arrange function will arrange rows in ascending order.
 
 ```{r}
-NTL.phys.data.depth.ascending <- arrange(NTL.phys.data, depth)
+NTL.phys.data.depth.ascending <- arrange(NTL.phys.data, depth) #you're not removing any observations, just putting that column in ascending order
 NTL.phys.data.depth.descending <- arrange(NTL.phys.data, desc(depth))
 
 # Exercise: 
@@ -158,13 +158,13 @@ A package that makes coercing date much easier is `lubridate`. A guide to the pa
 
 ```{r}
 # add a month column to the dataset
-NTL.phys.data.PeterPaul1 <- mutate(NTL.phys.data.PeterPaul1, month = month(sampledate)) 
+NTL.phys.data.PeterPaul1 <- mutate(NTL.phys.data.PeterPaul1, month = month(sampledate)) #just adding a column to the dataset, not changing it
 
 # reorder columns to put month with the rest of the date variables
-NTL.phys.data.PeterPaul1 <- select(NTL.phys.data.PeterPaul1, lakeid:daynum, month, sampledate:comments)
+NTL.phys.data.PeterPaul1 <- select(NTL.phys.data.PeterPaul1, lakeid:daynum, month, sampledate:comments) #it doesnt make sense to have the month at the end of the dataset. we fix this through the select function, so you can use it to change the order of the columns. you need to find out where you want month to go. you want it to go after daynum and before sampledate
 
 # find out the start and end dates of the dataset
-interval(NTL.phys.data.PeterPaul1$sampledate[1], NTL.phys.data.PeterPaul1$sampledate[21613])
+interval(NTL.phys.data.PeterPaul1$sampledate[1], NTL.phys.data.PeterPaul1$sampledate[21613]) #this creates an interval object that has a specified start and end date. or you want the first and last data.
 interval(first(NTL.phys.data.PeterPaul1$sampledate), last(NTL.phys.data.PeterPaul1$sampledate))
 ```
 
@@ -181,7 +181,7 @@ NTL.phys.data.processed <-
   filter(lakename == "Paul Lake" | lakename == "Peter Lake") %>%
   select(lakename, sampledate:temperature_C) %>%
   mutate(temperature_F = (temperature_C*9/5) + 32)
-  
+  #with the pipe, you dont need to repeat the name of the data set again and again. it can be replaced by the word then which is %>%
 ```
 
 Notice that we did not place the dataset name inside the wrangling function but rather at the beginning.
@@ -190,6 +190,7 @@ Notice that we did not place the dataset name inside the wrangling function but 
 
 ```{r}
 write.csv(NTL.phys.data.PeterPaul1, row.names = FALSE, file = "./Data/Processed/NTL-LTER_Lake_ChemistryPhysics_PeterPaul_Processed.csv")
+#everytime you process data, you should save the processed data in csv form for further records
 ```
 
 ## Closing Discussion

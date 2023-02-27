@@ -21,7 +21,7 @@ getwd()
 library(tidyverse)
 library(lubridate)
 NTL.phys.data.PeterPaul <- read.csv("./Data/Processed/NTL-LTER_Lake_ChemistryPhysics_PeterPaul_Processed.csv")
-NTL.nutrient.data <- read.csv("./Data/Raw/NTL-LTER_Lake_Nutrients_Raw.csv",stringsAsFactors = TRUE)
+NTL.nutrient.data <- read.csv("./Data/Raw/NTL-LTER_Lake_Nutrients_Raw.csv",stringsAsFactors = TRUE) #we are now pulling in two data sets
 ```
 
 ## Review of basic exploration and wrangling
@@ -45,7 +45,7 @@ dim(NTL.nutrient.data.PeterPaul)
 str(NTL.nutrient.data.PeterPaul)
 summary(NTL.nutrient.data.PeterPaul$lakename) 
 # Notice that other lake names didn't go away, even though they have zero values
-NTL.nutrient.data.PeterPaul <- droplevels(NTL.nutrient.data.PeterPaul)
+NTL.nutrient.data.PeterPaul <- droplevels(NTL.nutrient.data.PeterPaul) #if you want the other lake names to go away
 summary(NTL.nutrient.data.PeterPaul$lakename)
 summary(NTL.nutrient.data.PeterPaul$comments)
 class(NTL.nutrient.data.PeterPaul$sampledate)
@@ -85,17 +85,23 @@ However, there may be situations where we want to reshape our dataset, for examp
 We will work with the new functions from `tidyr`. For gather we will use `pivot_longer` and for spread we will use `pivot_wider`. Note that if you are familiar with `gather` and `spread` will may still use it, they are not going away, but they are not under active development.
 
 ```{r}
+#gather is you are transforming columns into rows
+#spread you are transforming rows into columns, so you are making it wider
+
 # Gather nutrient data into one column
 #NTL.nutrient.data.PeterPaul.gathered <- gather(NTL.nutrient.data.PeterPaul.subset, "nutrient", "concentration", tn_ug:po4)
 
 # Gather nutrient data into one column using pivot_longer
 NTL.nutrient.data.PeterPaul.gathered <- pivot_longer(NTL.nutrient.data.PeterPaul.subset,tn_ug:po4, names_to = "nutrient", values_to = "concentration")
-
-NTL.nutrient.data.PeterPaul.gathered <- subset(NTL.nutrient.data.PeterPaul.gathered, !is.na(concentration))
-count(NTL.nutrient.data.PeterPaul.gathered, nutrient)
+#you want to gather the nutrient data into one column. you need to add two columns, transform 4 columns into two
+#but now there is a lot of NAs, so if there is a row that has NA, you should remove the rows that have NA
+NTL.nutrient.data.PeterPaul.gathered <- subset(NTL.nutrient.data.PeterPaul.gathered, !is.na(concentration)) #use the function subset, if you have an NA for the row correlated to concentration
+count(NTL.nutrient.data.PeterPaul.gathered, nutrient) #for each nutrient, how many observations do we have?
 
 write.csv(NTL.nutrient.data.PeterPaul.gathered, row.names = FALSE, 
           file = "./Data/Processed/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv")
+
+#store the processed data into another file
 
 # Spread nutrient data into separate columns
 #NTL.nutrient.data.PeterPaul.spread <- spread(NTL.nutrient.data.PeterPaul.gathered, nutrient, concentration)
@@ -154,13 +160,13 @@ LitterFiles = list.files(path = "./Data/Raw/NIWO_Litter/", pattern="*.csv", full
 LitterFiles
 
 Litter <- LitterFiles %>%
-  plyr::ldply(read.csv)
+  plyr::ldply(read.csv) #you are going to use a pipe, for Litter files
 ```
 
 We also have information about individual traps, including the location and type of landcover. Let's join these two datasets. Note that "siteID", "plotID" and "trapID" exist in both datasets, and we can join them by these conditions. Notice the dimensions of the final dataset.
 ```{r}
 Trap <- read.csv("./Data/Raw/NEON_NIWO_Litter_trapdata_raw.csv")
-LitterTrap <- left_join(Litter, Trap, by = c("siteID", "plotID", "trapID"))
+LitterTrap <- left_join(Litter, Trap, by = c("siteID", "plotID", "trapID")) #you are mixing the 23 variables from trap minus the three that they have in common
 
 dim(Litter)
 dim(Trap)
