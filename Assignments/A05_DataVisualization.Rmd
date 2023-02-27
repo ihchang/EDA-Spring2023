@@ -1,6 +1,6 @@
 ---
-title: "Assignment 5: Data Visualization"
-author: "Student Name"
+title: "IreneChang_A05_DataVisualization.Rmd"
+author: "Irene Chang"
 date: "Spring 2023"
 output: pdf_document
 geometry: margin=2.54cm
@@ -32,8 +32,29 @@ This exercise accompanies the lessons in Environmental Data Analytics on Data Vi
 
 ```{r initialize project}
 #1 
+library(tidyverse)
+library(lubridate)
+library(cowplot)
+library(here)
+
+here() 
+
+PeterPaulNutrients.Processed <-
+  read.csv(here("Data/Processed_KEY/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv"),
+           stringsAsFactors = TRUE)
+
+NIWOLitter.Processed <-
+  read.csv(here("Data/Processed_KEY/NEON_NIWO_Litter_mass_trap_Processed.csv"), 
+           stringsAsFactors = TRUE)
+
 
 #2 
+
+class(NIWOLitter.Processed$collectDate)
+NIWOLitter.Processed$collectDate <- ymd(NIWOLitter.Processed$collectDate)
+
+class(PeterPaulNutrients.Processed$sampledate)
+PeterPaulNutrients.Processed$sampledate <- ymd(PeterPaulNutrients.Processed$sampledate)
 
 ```
 ## Define your theme
@@ -47,6 +68,15 @@ This exercise accompanies the lessons in Environmental Data Analytics on Data Vi
 ```{r build plot theme}
 #3
 
+mytheme <-
+  theme_classic() +
+  theme(axis.text = element_text(color = "black"),
+        legend.position = "bottom")
+#mytheme is a classic looking plot with no gridlines. 
+#The axis text will be black and the legend will be at the top.
+
+theme_set(mytheme)
+
 ```
 
 ## Create graphs
@@ -56,6 +86,17 @@ For numbers 4-7, create ggplot graphs and adjust aesthetics to follow best pract
 
 ```{r plot total P vs PO4}
 #4 
+
+totalPandPO4 <-
+  ggplot(PeterPaulNutrients.Processed, aes(x = po4, y = tp_ug, color = lakename)) + 
+  geom_point() +
+  xlim(0, 45) +
+  ylim(0, 150) +
+  geom_smooth(method = lm, color = "black") + 
+  labs(
+    title = "Peter and Paul Lake Total Phosphorus by Phosphate",
+    color = "Lake Name")
+print(totalPandPO4)
 
 ```
 
@@ -67,11 +108,50 @@ Tip: R has a build in variable called `month.abb` that returns a list of months;
 ```{r Create boxplots}
 #5 
 
+
+Nutrients.temp <-
+  ggplot(PeterPaulNutrients.Processed, 
+         aes(x = month, 
+             y = temperature_C, 
+             color = lakename)) +
+  labs(color = "Lake Name") +
+  geom_boxplot()
+print(Nutrients.temp)
+
+#alternative to see by month is to use aes(x = month.abb[month]) to see the breakdown of temp, tp, and tn by month. However, did not do this because when combining graphs, it was too complicated to properly visualize.
+
+Nutrients.tp <-
+  ggplot(PeterPaulNutrients.Processed, 
+         aes(x = month, 
+             y = tp_ug, 
+             color = lakename)) +
+  labs(color = "Lake Name") +
+  geom_boxplot()
+print(Nutrients.tp)
+
+Nutrients.tn <-
+  ggplot(PeterPaulNutrients.Processed, 
+         aes(x = month, 
+             y = tn_ug, 
+             color = lakename)) +
+  labs(color = "Lake Name") +
+  geom_boxplot()
+print(Nutrients.tn) 
+
+Nutrients.temp.tp.tn <-
+  plot_grid(Nutrients.temp + theme(legend.position="none"),
+            Nutrients.tp + theme(legend.position = "none"),
+            Nutrients.tn + theme(legend.position = "none"), 
+            nrow= 1, 
+            align = "h")
+legend <- get_legend(Nutrients.temp + theme(legend.position = "right")) 
+
+plot_grid(Nutrients.temp.tp.tn, legend) 
 ```
 
 Question: What do you observe about the variables of interest over seasons and between lakes? 
 
-> Answer: 
+> Answer: The median temperature is a bit higher overall at Paul Lake than Peter Lake. For both lakes, the median warmest month is September. The total phosphorus levels for Peter Lake is higher overall than Paul Lake. For both lakes, the highest median total phosphorus levels were observed in September. The total nitrogen levels are also higher overall for Peter lake than Paul Lake. For Peter Lake, the highest total nitrogen levels were observed in August. For both the highest median total nitrogen levels were observed in September. 
 
 6. [Niwot Ridge] Plot a subset of the litter dataset by displaying only the "Needles" functional group. Plot the dry mass of needle litter by date and separate by NLCD class with a color aesthetic. (no need to adjust the name of each land use)
 
@@ -80,11 +160,32 @@ Question: What do you observe about the variables of interest over seasons and b
 ```{r Plot litter}
 #6
 
+Litter.Needles <-
+  ggplot(subset(NIWOLitter.Processed, functionalGroup == "Needles"),
+         aes(x = collectDate, y = dryMass, color = nlcdClass)) +
+  geom_point() +
+  labs(
+    title = "Niwot Ridge Dry Mass by Collection Date",
+    x = "Collection Date",
+    y = "Dry Mass")
+print(Litter.Needles)
 
 #7
 
-
+Litter.Needles.Facets <- NIWOLitter.Processed %>% 
+  filter(functionalGroup == "Needles") %>% 
+  ggplot(aes(x = collectDate,
+             y = dryMass,
+             color = nlcdClass)) +
+  geom_point() +
+  facet_wrap(vars(nlcdClass)) +
+  labs(
+    title = "Niwot Ridge Dry Mass by Collection Date",
+    x = "Collection Date",
+    y = "Dry Mass")
+print(Litter.Needles.Facets)
+  
 ```
 Question: Which of these plots (6 vs. 7) do you think is more effective, and why? 
 
-> Answer:
+> Answer: I think that the plot from #7 is more effective because the data kind of gets lost when you have it all on one graph, but when you create 3 facets, then the changes over time within nlcdClass become more clear and its a better visualization to compare them across nlcdClass. 
