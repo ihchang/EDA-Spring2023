@@ -75,7 +75,7 @@ library(tidyverse)
 
 Question: What happens in the console when you load a package?
 
-> Answer: 
+> Answer: it shows you all the packages that are associated with it, in the case of tidyverse
 
 ### Import your datasets
 
@@ -117,7 +117,7 @@ Take a moment to read through the README file associated with the USGS dataset o
 > ANSWER: 
 
 ```{r Exploring data}
-View(USGS.flow.data)
+#View(USGS.flow.data)
 # Alternate option: click on data frame in Environment tab
 
 class(USGS.flow.data)
@@ -131,11 +131,11 @@ colnames(USGS.flow.data) <- c("agency_cd", "site_no", "datetime",
                               "gage.height.max", "gage.height.max.approval", 
                               "gage.height.min", "gage.height.min.approval", 
                               "gage.height.mean", "gage.height.mean.approval")
-str(USGS.flow.data)
-dim(USGS.flow.data)
-length(USGS.flow.data)
+str(USGS.flow.data) #show your data frame and all the objects
+dim(USGS.flow.data) #how many rows and how many columns
+length(USGS.flow.data) #how many columns
 
-head(USGS.flow.data)
+head(USGS.flow.data) #shows the first few rows (no specification, shows 6)
 head(USGS.flow.data, 10)
 tail(USGS.flow.data, 5)
 USGS.flow.data[30000:30005, c(3, 8, 14)]
@@ -149,7 +149,7 @@ summary(USGS.flow.data)  #could point to column only with $
 ```
 
 What happened to blank cells in the spreadsheet when they were imported into R?
-> Answer: 
+> Answer: For many instances we have NAs because there was no data imported. 
 
 ## Adjusting Datasets
 
@@ -166,7 +166,7 @@ Question: What types of research questions might make it favorable to remove NAs
 > Answer: 
 
 ```{r Removing NAs}
-USGS.flow.data.complete <- na.omit(USGS.flow.data)
+USGS.flow.data.complete <- na.omit(USGS.flow.data) #creates a new data file without the NAs, the new data frame will show up in the environment
 dim(USGS.flow.data)
 dim(USGS.flow.data.complete)
 

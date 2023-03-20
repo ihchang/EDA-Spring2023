@@ -57,7 +57,9 @@ theme_set(mytheme)
 A linear regression is comprised of a continuous response variable, plus a combination of 1+ continuous response variables (plus the error term). The deterministic portion of the equation describes the response variable as lying on a straight line, with an intercept and a slope term. The equation is thus a typical algebraic expression: 
 $$ y = \alpha + \beta*x + \epsilon $$
 
-The goal for the linear regression is to find a **line of best fit**, which is the line drawn through the bivariate space that minimizes the total distance of points from the line. This is also called a "least squares" regression. The remainder of the variance not explained by the model is called the **residual error.** 
+This denotes a straight line, and the e is the error term (the true value of y from the term)
+
+The goal for the linear regression is to find a **line of best fit**, which is the line drawn through the bivariate space that minimizes the total distance of points from the line. This is also called a "least squares" regression. The remainder of the variance not explained by the model is called the **residual error.** What is the best way to represent y, you are trying to minimize the distance from the scatter points to the line.
 
 The linear regression will test the null hypotheses that
 
@@ -70,14 +72,19 @@ Important components of the linear regression are the correlation and the R-squa
 
 ## Simple Linear Regression
 
+based on one variable on the right side of the equation.
+are we about to find any relationship between irradiance based on depth levels?
 For the NTL-LTER dataset, can we predict irradiance (light level) from depth?
 
 ```{r}
-irradiance.regression <- lm(PeterPaul.chem.nutrients$irradianceWater ~ PeterPaul.chem.nutrients$depth)
+irradiance.regression <- lm(PeterPaul.chem.nutrients$irradianceWater ~ PeterPaul.chem.nutrients$depth) #lm stands for linear model
 
 # another way to format the lm() function
-irradiance.regression <- lm(data = PeterPaul.chem.nutrients, irradianceWater ~ depth)
+irradiance.regression <- lm(data = PeterPaul.chem.nutrients, irradianceWater ~ depth) #the tilda basically means by
 summary(irradiance.regression)
+#the mean of the residuals, etc... the p value is less than .05, so its worthwhile to try to estimate irradiance levels by depth.
+#depth explains about 30% of the variance
+#the strength of the correlation is about 55%
 
 # Correlation
 cor.test(PeterPaul.chem.nutrients$irradianceWater, PeterPaul.chem.nutrients$depth)
@@ -92,16 +99,18 @@ An exploratory option to visualize the model fit is to use the function `plot`. 
 
 1. **Residuals vs. Fitted.** The value predicted by the line of best fit is the fitted value, and the residual is the distance of that actual value from the predicted value. By definition, there will be a balance of positive and negative residuals. Watch for drastic asymmetry from side to side or a marked departure from zero for the red line - these are signs of a poor model fit.
 
-2. **Normal Q-Q.** The points should fall close to the 1:1 line. We often see departures from 1:1 at the high and low ends of the dataset, which could be outliers. 
+2. **Normal Q-Q.** The points should fall close to the 1:1 line. We often see departures from 1:1 at the high and low ends of the dataset, which could be outliers. Compare the residuals with a normal distribution.
 
 3. **Scale-Location.** Similar to the residuals vs. fitted graph, this will graph the squared standardized residuals by the fitted values. 
 
 4. **Residuals vs. Leverage.** This graph will display potential outliers. The values that fall outside the dashed red lines (Cook's distance) are outliers for the model. Watch for drastic departures of the solid red line from horizontal - this is a sign of a poor model fit.
 
 ```{r, fig.height = 3, fig.width = 4}
-par(mfrow = c(2,2), mar=c(4,4,4,4))
+par(mfrow = c(2,2), mar=c(4,4,4,4)) #dividing the plot screen into 4 cells. the mar defines the limits of the grid
 plot(irradiance.regression)
 par(mfrow = c(1,1))
+#residuals vs fitted, you are looking for symmetry along the red line, and want the red line to be relatively straight
+#the dash line is the quantile for a normal distribution.
 ```
 
 The option best suited for communicating findings is to plot the explanatory and response variables as a scatterplot. 
@@ -113,6 +122,7 @@ irradiancebydepth <-
   ylim(0, 2000) +
   geom_point() 
 print(irradiancebydepth) 
+#you can clearly see that you dont have a linear relationship between x and y
 ```
 
 Given the distribution of irradiance values, we don't have a linear relationship between x and y in this case. Let's try log-transforming the irradiance values. Note we also removing the observations that seems to ba an outlier.
@@ -126,14 +136,16 @@ summary(irradiance.regression2)
 par(mfrow = c(2,2), mar=c(4,4,4,4))
 plot(irradiance.regression2)
 par(mfrow = c(1,1))
+#now its better to see these plots because you removed the outlier and its easier to see symmetry on the red lines for residuals vs fitted plots
 
 # Add a line and standard error for the linear regression
 irradiancebydepth2 <- 
   ggplot(PeterPaul.chem.nutrients, aes(x = depth, y = irradianceWater)) +
   geom_smooth(method = "lm") +
-  scale_y_log10() +
+  scale_y_log10() + #we're taking the log, so the y axis is the log transformed irradiance water
   geom_point() 
 print(irradiancebydepth2) 
+#now we can look at the relationship better, when we zoom in the plot, we see a gray confidence interval for the line. Sometimes we dontt want that confidence interval, and set the line to black
 
 # SE - confidence interval around smooth can also be removed
 irradiancebydepth2 <- 
@@ -154,6 +166,7 @@ It is possible, and often useful, to consider multiple continuous explanatory va
 TPregression <- lm(data = subset(PeterPaul.chem.nutrients, lakename == "Paul Lake"), 
                    tp_ug ~ depth + dissolvedOxygen)
 summary(TPregression)
+#this section is on another GLM, its still a linear regression, but the multiple is that now we have more than 1 variable on the right side of the equation, so more than one x trying to explain the variability on y. so how do we do this in R? we are looking at total phosphorus levels, and this will be depending on depth and dissolved oxygen. we will be using the same lm function. we are just looking at the regression for paul lake. we are subsetting our entire data set to only have observations for paul lake.
 
 TPplot <- ggplot(subset(PeterPaul.chem.nutrients, lakename == "Paul Lake"), 
                  aes(x = dissolvedOxygen, y = tp_ug, color = depth)) +
@@ -164,7 +177,11 @@ print(TPplot)
 par(mfrow = c(2,2), mar=c(4,4,4,4))
 plot(TPregression)
 par(mfrow = c(1,1))
-
+#these are the residual plots
+#we want the first line to be flat and for there to be symmetry with respect to the red line
+#for scale equation, we see the same problems
+#residual vs leverage, we see that some of the residuals, there are outliers
+#we need to fix this and find more explanatory variables; there is something else happening that is causing variablility. We need to look at correlation coefficient
 ```
 
 ## Correlation Plots
@@ -172,13 +189,13 @@ We can also make exploratory plots of several continuous data points to determin
 
 ```{r, fig.height = 3, fig.width = 4}
 #install.packages("corrplot")
-library(corrplot)
-PeterPaulnutrients <- 
+#library(corrplot)
+PeterPaulnutrients <- #create a new data frame, just the nutrients and remove the NAs
   PeterPaul.chem.nutrients %>%
   select(tn_ug:po4) %>%
   na.omit()
 PeterPaulCorr <- cor(PeterPaulnutrients)
-corrplot(PeterPaulCorr, method = "ellipse")
+corrplot(PeterPaulCorr, method = "ellipse") #the correlation plot matrix, the diagonal is perfectly correlated, the ovals is one variable agaist the other. the thinner the oval, the stronger the relationship is. dark red is a strong but negative correlation.
 corrplot.mixed(PeterPaulCorr, upper = "ellipse")
 ```
 
@@ -193,11 +210,11 @@ Paul.naomit <- PeterPaul.chem.nutrients %>%
   filter(lakename == "Paul Lake") %>%
   na.omit()
 
-TPAIC <- lm(data = Paul.naomit, tp_ug ~ depth + dissolvedOxygen + 
+TPAIC <- lm(data = Paul.naomit, tp_ug ~ depth + dissolvedOxygen + #total phos as a function of depth, all of these are the 5 explan vars
               temperature_C + tn_ug + po4)
 
 #Choose a model by AIC in a Stepwise Algorithm
-step(TPAIC)
+step(TPAIC) #you want the AIC to be smaller
 TPmodel <- lm(data = Paul.naomit, tp_ug ~ dissolvedOxygen + temperature_C + tn_ug)
 summary(TPmodel)
 

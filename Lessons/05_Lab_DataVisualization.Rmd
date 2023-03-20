@@ -48,6 +48,7 @@ ggplot(data=data.frame(x=0,y=0))+
     y=0.025,
     label=expression(paste("Mean is ", mu,",", R^{2},'=0.6'))
     )
+#paste brings together strings, there is paste and paste0, paste does not insert spaces. the ^ is to the power of. mean is green letter mu
 
 #Print the plot
 print(Plot_text)
@@ -62,6 +63,8 @@ ggsave(
   dpi = 300
   )
 
+#for the gg save we can just put the name, and if you dont have a folder, then it will create one for you
+#warning is like you might want to second a look, but error is bad, you need to fix it
 ```
 
 ---
@@ -71,7 +74,8 @@ ggsave(
 
 ```{r, message = FALSE, warning = FALSE}
 #Assign a variable to the processed data folder location
-processed_data = "Data/Processed_KEY"
+processed_data = "Data/Processed_KEY" #this is a string but it matches the folder structure on our machines
+#here, once you import the package, will always point to where the Rproj folder is, its more stable than getwd()
 
 #Read in data
 PeterPaul.chem.nutrients <- read.csv(
@@ -92,15 +96,39 @@ EPAair$Date <- ymd(EPAair$Date)
 Say we want to plot the number of records each month in the Peter/Paul lakes dataset. How might we do that? What challenges do we face? 
 
 ```{r Plot the number of records by month}
-#What kind of values are months?
+#What kind of values are months? We use a lot of categorical data, so we string as factors, and we might have some numerical data that we might want to have as factors. Think of lake names, that means that we can have 350 records, and there are 2 levels, such as peter lake or paul lake. we have in our data set, this column and month, we might think should this be a factor?
+
+class(PeterPaul.chem.nutrients$month)
 
 #List unique values
+unique(PeterPaul.chem.nutrients$month) 
 
 #Plot how many Lake observations occur each month
+ggplot(PeterPaul.chem.nutrients,
+       aes(x=month)) +
+  geom_histogram(bins=12)
+
+#we cant use histogram because it doesnt show all of our months
+#we have to think about how we are treating our months and we want to have each month to be distinct. We need to convert our month to a factor. So 2 has nothing to do with month 3. We are going to treat our months as factors
 
 #Convert month to a factor -- with 12 levels, labelled with month names
+factor(PeterPaul.chem.nutrients$month,
+       levels = 1:12,
+       labels = month.abb) #has converted all the numeric months to names
+
+#this shows that this has levels, unique values. these are treated as categories so now if we went back 
 
 #Try again: Plot how many Lake observations occur each month
+ggplot(PeterPaul.chem.nutrients,
+       aes(x=factor(month, levels=1:12, labels = month.abb))) +
+  geom_bar() +
+  scale_x_discrete(drop = FALSE) +
+  labs(
+    title = "My Plot",
+    x = "Month"
+  )
+
+#this crunches our year, we want to keep our empty months and instead of numbers here, add month names. This is where learning visualization is hard. we need to play around with the axis. we want to show the empty categories, so we put drop as false. + are for ggplot commands
 
 #Alter to include missing months
 
@@ -229,6 +257,7 @@ Exercise: build your own scatterplots of PeterPaul.chem.nutrients
 # Color your points by year, and facet by lake in two rows.
 # Change the ylab name
 
+#to get the degree sign you can do ALT 248
 
 #2. 
 # Plot temperature by date. Color your points by depth.
@@ -236,7 +265,7 @@ Exercise: build your own scatterplots of PeterPaul.chem.nutrients
 # Change the color palette to magma and play with direction (+- 1), which one makes more sense?
 # Change x axis to include marker/labels every 5 years
 
-
+#alpha sets the transparency, 0 will either be fully opaque or not
 
 ```
 ## Plotting the relationship between two continuous variables: Scatterplot

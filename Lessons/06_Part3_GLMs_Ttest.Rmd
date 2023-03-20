@@ -14,7 +14,7 @@ editor_options:
 ## Set up your session
 
 ```{r, message = FALSE}
-#install.packages('formatR')
+install.packages('formatR')
 knitr::opts_chunk$set(tidy.opts=list(width.cutoff=80), tidy=TRUE)
 
 library(tidyverse)
@@ -47,7 +47,7 @@ The one-sample t-test relies on the assumption that the variable is normally dis
 
 
 For example, we might ask ourselves (from the EPA air quality processed dataset): 
-Are Ozone levels below the threshold for "good" AQI index (0-50)?
+Are Ozone levels below the threshold for "good" AQI index (0-50)? Is the mean less than 50?
 
 ### Import data set
 
@@ -70,7 +70,7 @@ summary(EPAair$Ozone) #mean = 40.88 and median = 40
 length(EPAair$Ozone) #8976 observations
 
 O3.onesample <- t.test(EPAair$Ozone, mu = 50, alternative = "less")
-O3.onesample
+O3.onesample #rejecting the null and accepting the alternative, so we know that the mean is less than 50.
 
 Ozone.plot <- ggplot(EPAair, aes(x = Ozone)) +
   geom_density(fill = "gray") +
@@ -109,7 +109,7 @@ O3.twosample
 # Format as a GLM
 O3.twosample2 <- lm(EPAair$Ozone ~ EPAair$Year)
 summary(O3.twosample2)
-
+#we are now asking is year a predictor of ozone levels?
 ```
 
 

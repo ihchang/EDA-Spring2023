@@ -1,10 +1,13 @@
 ---
 title: "6: Part 2 - Generalized Linear Models"
-author: "Environmental Data Analytics | John Fay and Luana Lima | Developed by Kateri Salk"
+author: Environmental Data Analytics | John Fay and Luana Lima | Developed by Kateri
+  Salk
 date: "Spring 2023"
-output: pdf_document
+output:
+  pdf_document: default
+  word_document: default
 geometry: margin=2.54cm
-editor_options: 
+editor_options:
   chunk_output_type: console
 ---
 
@@ -16,7 +19,7 @@ editor_options:
 ```{r, message = FALSE}
 
 library(tidyverse)
-#install.packages("agricolae")
+install.packages("agricolae")
 library(agricolae)   #you may need to install/update package "htmltools" before installing and loading agricolae
 library(here)
 here()
@@ -34,9 +37,9 @@ theme_set(mytheme)
 ```
 
 ### One-way ANOVA
-A one-way ANOVA is used when you have one categorical explanatory variable with more than two categories. In R, we can run the model with the function `lm` or `aov`, the latter of which will allow us to run post-hoc tests to determine pairwise differences.
+A one-way ANOVA is used when you have one categorical explanatory variable with more than two categories. In R, we can run the model with the function `lm` or `aov`, the latter of which will allow us to run post-hoc tests to determine pairwise differences. We may need to determine whether three or more populations have equal means. Then we have to conduct a formal hypothesis test. This is an analysis of variance (ANOVA). Lets say we are looking at 4 diff populations. We are looking at n populations at 4 levels. The ANOVA will help you determine if the variance is due to the different locations or different levels. levels (the populations)
 
-For example: Does total litter biomass differ among sites at the Niwot Ridge LTER?
+For example: Does total litter biomass differ among sites at the Niwot Ridge LTER? we want to check if the mean of the biomass differs among the sites. we will have to wrangle the data first, so that the subset only has the information that we need.
 ```{r}
 # Wrangle the data
 Litter.Totals <- Litter %>%
@@ -65,24 +68,24 @@ shapiro.test(Litter.Totals$dryMass[Litter.Totals$plotID == "NIWO_063"])
 shapiro.test(Litter.Totals$dryMass[Litter.Totals$plotID == "NIWO_064"])
 shapiro.test(Litter.Totals$dryMass[Litter.Totals$plotID == "NIWO_067"])
 
-#results: reject null in all except two: NIWO_057 and NIWO_046
+#results: reject null in all except two: NIWO_057 and NIWO_046, the data for the first one does not follow normal distribution but that doesnt mean we cannot run the anova test
 #but method is robust from small deviations from normal distribution
-qqnorm(Litter.Totals$dryMass); qqline(Litter.Totals$dryMass)
+qqnorm(Litter.Totals$dryMass); qqline(Litter.Totals$dryMass) #the data clearly does not follow a normal distribution
 
 # Test for equal variance
 # ANOVA is robust against departures from equal variance.
-# bartlett.test() performs Bartlett's test of the null that the variances in each of the groups (samples) are the same.
+# bartlett.test() performs Bartlett's test of the null that the variances in each of the groups (samples) are the same. will check the null that the variance of each of the levels are the same. 
 bartlett.test(Litter.Totals$dryMass ~ Litter.Totals$plotID)
 
 #results: reject null i.e. variances are not equal
 
 # Format ANOVA as aov
-Litter.Totals.anova <- aov(data = Litter.Totals, dryMass ~ plotID)
+Litter.Totals.anova <- aov(data = Litter.Totals, dryMass ~ plotID) #drymass is dependent and plotID is categorical
 summary(Litter.Totals.anova)
 
-#results: reject null hypothesis i.e. difference between a pair of group means is statistically significant
+#results: reject null hypothesis i.e. difference between a pair of group means is statistically significant. The null is the mean is the same across all different sites, so if we are rejecting that then we are saying that the means are not all the same. we know that the means are not all the same, but its not telling us which means are not the same. so we need to run more test to find out which ones are different.
 
-# Format ANOVA as lm
+# Format ANOVA as lm; the main difference will be the outputs and the summary table. 
 Litter.Totals.anova2 <- lm(data = Litter.Totals, dryMass ~ plotID)
 summary(Litter.Totals.anova2)
 
@@ -91,11 +94,11 @@ summary(Litter.Totals.anova2)
 plot(Litter.Totals.anova2)
 
 # Post-hoc test
-# TukeyHSD() computes Tukey Honest Significant Differences
+# TukeyHSD() computes Tukey Honest Significant Differences is the most common for testing all group variances
 TukeyHSD(Litter.Totals.anova)
 
 # Extract groupings for pairwise relationships
-Litter.Totals.groups <- HSD.test(Litter.Totals.anova, "plotID", group = TRUE)
+Litter.Totals.groups <- HSD.test(Litter.Totals.anova, "plotID", group = TRUE) #group=TRUE means that it will group things that have the same mean. the results are showing you some possible treatment groups. 
 Litter.Totals.groups
 
 # Graph the results
@@ -112,7 +115,7 @@ print(Litter.Totals.plot)
 
 What information does the output give us? How might we report this information in a report?
 
-> 
+> the first thing we need to do is to have the same order as our group list here, becaue all the a and b groups would be together and see the changes in the mean.
 
 ## TWO-WAY ANOVA
 
@@ -124,6 +127,7 @@ For example: What if we wanted to know how litter masses varied across functiona
 # Format as aov
 Litter.anova.2way <- aov(data = Litter, dryMass ~ functionalGroup + nlcdClass)
 summary(Litter.anova.2way)
+#rejecting the null, the mean across the groups are different. 
 
 # Format as lm
 Litter.anova.2way2 <- lm(data = Litter, dryMass ~ functionalGroup + nlcdClass)
@@ -144,6 +148,7 @@ The output gives test statistics for each explanatory variable as well as the in
 # Format as aov
 Litter.anova.2way3 <- aov(data = Litter, dryMass ~ functionalGroup * nlcdClass)
 summary(Litter.anova.2way3)
+#the interaction is significant among the variables
 
 # Format as lm
 Litter.anova.2way4 <- lm(data = Litter, dryMass ~ functionalGroup * nlcdClass)
