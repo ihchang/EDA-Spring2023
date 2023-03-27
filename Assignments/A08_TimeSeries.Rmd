@@ -58,7 +58,11 @@ EPA.Ozone.2017<- read.csv("./Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2017_
 EPA.Ozone.2018<- read.csv("./Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2018_raw.csv")
 EPA.Ozone.2019<- read.csv("./Data/Raw/Ozone_TimeSeries/EPAair_O3_GaringerNC2019_raw.csv")
 
-GaringerOzone <- rbind(EPA.Ozone.2010, EPA.Ozone.2011, EPA.Ozone.2012, EPA.Ozone.2013, EPA.Ozone.2014, EPA.Ozone.2015, EPA.Ozone.2016, EPA.Ozone.2017, EPA.Ozone.2018, EPA.Ozone.2019)
+GaringerOzone <- rbind(EPA.Ozone.2010, EPA.Ozone.2011, 
+                       EPA.Ozone.2012, EPA.Ozone.2013, 
+                       EPA.Ozone.2014, EPA.Ozone.2015, 
+                       EPA.Ozone.2016, EPA.Ozone.2017, 
+                       EPA.Ozone.2018, EPA.Ozone.2019)
 
 ```
 
